@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Revisión semanal</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Semana">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" id="touch-icon" href="data:,">
+<link rel="manifest" id="manifest" href="data:,">
+<style>
+:root{
+  --bg:#f2f2f7;--card:#ffffff;--text:#1c1c1e;--muted:#6e6e73;--line:#d8d8dc;--field:#eeeef2;
+  --accent:#0a66d8;--on-accent:#ffffff;
+  --done:#1f8a3b;--partial:#b26a00;--not:#c62828;--on-status:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#000000;--card:#1c1c1e;--text:#f2f2f7;--muted:#98989f;--line:#38383a;--field:#2c2c2e;
+    --accent:#3a8bfd;--on-accent:#ffffff;
+    --done:#34c759;--partial:#ff9f0a;--not:#ff453a;--on-status:#000000;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:17px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent}
+main{max-width:640px;margin:0 auto;
+  padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px)}
+h1{font-size:30px;line-height:1.15;margin:8px 0 2px}
+h2{font-size:21px;margin:30px 0 10px}
+h3{font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
+p{margin:0 0 10px}
+.sub{color:var(--muted);margin-bottom:18px}
+.hint{color:var(--muted);font-size:15px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.btn{display:block;width:100%;min-height:52px;padding:12px 16px;border-radius:12px;
+  background:var(--card);color:var(--accent);font-weight:600;text-align:center}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.big{min-height:66px;font-size:20px}
+.btn + .btn{margin-top:10px}
+.btn:disabled{opacity:.4}
+.link{color:var(--accent);font-weight:600;min-height:44px;padding:8px 0}
+input[type=text],textarea{display:block;width:100%;font:inherit;font-size:17px;color:var(--text);
+  background:var(--field);border:1px solid transparent;border-radius:10px;padding:11px 12px;-webkit-appearance:none}
+textarea{min-height:120px;resize:vertical}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+::placeholder{color:var(--muted);opacity:1}
+.row{display:flex;gap:6px;align-items:center}
+.row + .row{margin-top:8px}
+.row input{flex:1;min-width:0}
+.x{flex:none;width:44px;height:44px;font-size:26px;line-height:1;color:var(--muted)}
+.act-title{font-weight:600}
+.goal-tag{font-size:13px;color:var(--muted);margin-bottom:2px}
+.seg{display:flex;gap:6px;margin-top:10px}
+.seg button{flex:1;min-height:46px;border-radius:10px;background:var(--field);font-size:15px;font-weight:600}
+.seg button.on{color:var(--on-status)}
+.seg button.on[data-s=done]{background:var(--done)}
+.seg button.on[data-s=partial]{background:var(--partial)}
+.seg button.on[data-s=not]{background:var(--not)}
+.reason{display:block;width:100%;text-align:left;margin-top:8px;font-size:15px;color:var(--muted);min-height:32px}
+.reason.missing{color:var(--not);font-weight:600}
+.note{display:flex;gap:6px;align-items:flex-start}
+.note + .note{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.note-body{flex:1;min-width:0}
+.note-time{font-size:13px;color:var(--muted)}
+.note-text,.ro-text{white-space:pre-wrap;overflow-wrap:anywhere}
+.ro-list{margin:0;padding-left:22px}
+.ro-list li + li{margin-top:6px}
+.ro-act + .ro-act{margin-top:10px}
+.st{font-size:14px;font-weight:700}
+.st.done{color:var(--done)}.st.partial{color:var(--partial)}.st.not{color:var(--not)}.st.none{color:var(--muted)}
+.ro-detail{font-size:15px;color:var(--muted)}
+.hist-item{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:56px;
+  padding:14px;background:var(--card);border-radius:12px;margin-bottom:8px;text-align:left;font-weight:600}
+.hist-item span:last-child{color:var(--muted);font-size:22px}
+.back{color:var(--accent);font-weight:600;min-height:44px;padding:8px 0}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.tabs button{flex:1;min-height:58px;font-size:15px;font-weight:600;color:var(--muted)}
+.tabs button.on{color:var(--accent)}
+dialog{border:0;border-radius:16px;padding:16px;background:var(--card);color:var(--text);
+  width:calc(100% - 24px);max-width:600px;margin:calc(env(safe-area-inset-top) + 12px) auto auto}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h2{margin:0 0 6px}
+.dlg-btns{display:flex;gap:10px;margin-top:14px}
+.dlg-btns .btn{margin:0;background:var(--field)}
+.dlg-btns .btn.primary{background:var(--accent)}
+.opt{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:12px;border:2px solid var(--line);margin-bottom:8px}
+.opt.on{border-color:var(--accent);background:var(--field)}
+.opt small{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 76px);
+  background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:15px;font-weight:600;z-index:10;display:none}
+.toast.show{display:block}
+</style>
+</head>
+<body>
+<main id="app"></main>
+
+<nav class="tabs" id="tabs">
+  <button data-act="tab" data-tab="week">Esta semana</button>
+  <button data-act="tab" data-tab="history">Historial</button>
+  <button data-act="tab" data-tab="goals">Objetivos</button>
+</nav>
+
+<dialog id="note-dlg">
+  <h2>Nota rápida</h2>
+  <textarea id="note-ta" placeholder="Escribe la nota…"></textarea>
+  <div class="dlg-btns">
+    <button class="btn" id="note-cancel">Cancelar</button>
+    <button class="btn primary" id="note-save">Guardar</button>
+  </div>
+</dialog>
+
+<dialog id="reason-dlg">
+  <h2 id="reason-title"></h2>
+  <p class="hint" id="reason-action"></p>
+  <button class="opt" data-reason="info"><strong>Nueva información</strong><small>Descubrí algo que cambió la dirección</small></button>
+  <button class="opt" data-reason="friction"><strong>Fricción</strong><small>Me costó, lo evité o lo procrastiné</small></button>
+  <textarea id="reason-comment" placeholder="Comentario (opcional)" style="min-height:80px"></textarea>
+  <div class="dlg-btns">
+    <button class="btn" id="reason-cancel">Cancelar</button>
+    <button class="btn primary" id="reason-save" disabled>Guardar</button>
+  </div>
+</dialog>
+
+<input type="file" id="import-input" accept=".json,application/json" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ---------- Constantes y utilidades ---------- */
+const STATUS = { done: 'Hecho', partial: 'Parcial', not: 'No hecho' };
+const REASON = { info: 'Nueva información', friction: 'Fricción' };
+const MAX_GOALS = 5, MAX_ACTIONS_PER_GOAL = 3;
+
+const $ = id => document.getElementById(id);
+const app = $('app');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function mondayOf(d) {
+  const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+  return m;
+}
+function parseYmd(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function weekRange(id) { const a = parseYmd(id); const b = new Date(a); b.setDate(b.getDate() + 6); return [a, b]; }
+const currentWeekId = () => ymd(mondayOf(new Date()));
+
+const fmtShort = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
+const fmtLong = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long' });
+const fmtNote = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+function weekLabel(id) { const [a, b] = weekRange(id); return `${fmtShort.format(a)} – ${fmtShort.format(b)} ${b.getFullYear()}`; }
+function weekLabelLong(id) { const [a, b] = weekRange(id); return `${fmtLong.format(a)} al ${fmtLong.format(b)} de ${b.getFullYear()}`; }
+
+let toastTimer;
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+/* ---------- IndexedDB ---------- */
+let db;
+function openDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('revision-semanal', 1);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      if (!d.objectStoreNames.contains('weeks')) d.createObjectStore('weeks', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings');
+    };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+function idbGetAll(store) {
+  return new Promise((res, rej) => {
+    const r = db.transaction(store).objectStore(store).getAll();
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+function idbGet(store, key) {
+  return new Promise((res, rej) => {
+    const r = db.transaction(store).objectStore(store).get(key);
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+function idbPut(store, value, key) {
+  return new Promise((res, rej) => {
+    const t = db.transaction(store, 'readwrite');
+    const s = t.objectStore(store);
+    if (key === undefined) s.put(value); else s.put(value, key);
+    t.oncomplete = () => res(); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  });
+}
+function idbReplaceAll(goals, weeks) {
+  return new Promise((res, rej) => {
+    const t = db.transaction(['weeks', 'settings'], 'readwrite');
+    const ws = t.objectStore('weeks');
+    ws.clear();
+    weeks.forEach(w => ws.put(w));
+    t.objectStore('settings').put(goals, 'goals');
+    t.oncomplete = () => res(); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  });
+}
+
+let saveErrorShown = false;
+function onSaveError(e) {
+  console.error(e);
+  if (!saveErrorShown) { saveErrorShown = true; alert('No se pudieron guardar los cambios en el dispositivo.'); }
+}
+const plain = o => JSON.parse(JSON.stringify(o));
+const saveWeek = w => idbPut('weeks', plain(w)).catch(onSaveError);
+const saveGoals = () => idbPut('settings', plain(state.goals), 'goals').catch(onSaveError);
+
+// Guardado diferido para lo que se escribe tecla a tecla
+const pending = new Map(); let saveTimer = null;
+function schedule(key, fn) { pending.set(key, fn); clearTimeout(saveTimer); saveTimer = setTimeout(flush, 400); }
+function flush() { clearTimeout(saveTimer); const fns = [...pending.values()]; pending.clear(); fns.forEach(f => f()); }
+function saveWeekSoon(w) { schedule('w:' + w.id, () => saveWeek(w)); }
+function saveWeekNow(w) { saveWeekSoon(w); flush(); }
+
+/* ---------- Estado ---------- */
+const state = { goals: [], weeks: {}, tab: 'week', histId: null };
+
+function cur() {
+  const id = currentWeekId();
+  if (!state.weeks[id]) {
+    state.weeks[id] = {
+      id,
+      goals: state.goals.filter(g => g.text.trim()).map(g => ({ id: g.id, text: g.text })),
+      actions: [], notes: [], progress: ''
+    };
+    saveWeek(state.weeks[id]);
+  }
+  return state.weeks[id];
+}
+
+function syncGoalsToCurrentWeek() {
+  const w = cur();
+  w.goals = state.goals.map(g => ({ id: g.id, text: g.text }));
+  schedule('goals', saveGoals);
+  saveWeekSoon(w);
+}
+
+const goalTitle = g => g.text.trim() || 'Objetivo sin nombre';
+function actionsOf(w, gid) {
+  const ids = new Set(w.goals.map(g => g.id));
+  return w.actions.filter(a => gid === null ? (!a.goalId || !ids.has(a.goalId)) : a.goalId === gid);
+}
+// Grupos con acciones no vacías, en orden: objetivos y después "Sin objetivo"
+function planGroups(w) {
+  const out = [];
+  for (const g of w.goals) {
+    const acts = actionsOf(w, g.id).filter(a => a.text.trim());
+    if (acts.length) out.push({ title: goalTitle(g), actions: acts });
+  }
+  const free = actionsOf(w, null).filter(a => a.text.trim());
+  if (free.length) out.push({ title: 'Sin objetivo', actions: free });
+  return out;
+}
+
+/* ---------- Markdown ---------- */
+function actionMd(a) {
+  let s = `- ${a.status === 'done' ? '[x]' : '[ ]'} ${a.text.trim()}`;
+  if (a.status) {
+    s += ` — **${STATUS[a.status]}**`;
+    if (a.reason) s += ` (${REASON[a.reason]})`;
+    if (a.comment && a.comment.trim()) s += `: ${a.comment.trim().replace(/\s*\n\s*/g, ' ')}`;
+  } else s += ' — _Sin marcar_';
+  return s;
+}
+function weekToMarkdown(w) {
+  const L = [`# Semana del ${weekLabelLong(w.id)}`, '', '## Objetivos'];
+  const goals = w.goals.filter(g => g.text.trim());
+  if (goals.length) goals.forEach((g, i) => L.push(`${i + 1}. ${g.text.trim()}`)); else L.push('_Sin objetivos_');
+
+  L.push('', '## Plan');
+  const groups = planGroups(w);
+  if (!groups.length) L.push('_Sin acciones_');
+  groups.forEach(gr => { L.push('', `### ${gr.title}`); gr.actions.forEach(a => L.push(actionMd(a))); });
+
+  L.push('', '## Notas');
+  const notes = [...w.notes].sort((a, b) => a.ts - b.ts);
+  if (notes.length) notes.forEach(n => L.push(`- **${fmtNote.format(new Date(n.ts))}** — ${n.text.trim().replace(/\n/g, '\n  ')}`));
+  else L.push('_Sin notas_');
+
+  L.push('', '## Avances de la semana', w.progress.trim() || '_Sin avances anotados_');
+  return L.join('\n') + '\n';
+}
+
+/* ---------- Render ---------- */
+function render() {
+  document.querySelectorAll('#tabs button').forEach(b => {
+    const on = b.dataset.tab === state.tab;
+    b.classList.toggle('on', on);
+    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  if (state.tab === 'week') renderWeek();
+  else if (state.tab === 'history') state.histId && state.weeks[state.histId] ? renderHistoryWeek() : renderHistory();
+  else renderGoals();
+}
+
+function renderWeek() {
+  const w = cur();
+  let h = `<h1>Esta semana</h1><p class="sub">${esc(weekLabel(w.id))}</p>
+    <button class="btn primary big" data-act="note">+ Nota rápida</button>
+    <h2>Plan</h2>`;
+  if (!w.goals.length) h += `<p class="hint">Aún no tienes objetivos. Añádelos en la pestaña Objetivos.</p>`;
+  w.goals.forEach(g => { h += planCard(w, g.id, goalTitle(g)); });
+  h += planCard(w, null, 'Sin objetivo');
+
+  h += `<h2>Notas</h2><div class="card">`;
+  const notes = [...w.notes].sort((a, b) => a.ts - b.ts);
+  if (!notes.length) h += `<p class="hint" style="margin:0">Sin notas todavía.</p>`;
+  notes.forEach(n => {
+    h += `<div class="note"><div class="note-body"><div class="note-time">${esc(fmtNote.format(new Date(n.ts)))}</div>
+      <div class="note-text">${esc(n.text)}</div></div>
+      <button class="x" data-act="del-note" data-nid="${n.id}" aria-label="Borrar nota">×</button></div>`;
+  });
+  h += `</div>`;
+
+  h += `<h2>Cierre de la semana</h2><div id="close"></div>
+    <h2>Avances de la semana</h2>
+    <textarea data-field="progress" placeholder="¿Qué avanzaste esta semana?">${esc(w.progress)}</textarea>
+    <div style="height:20px"></div>
+    <button class="btn" data-act="copy-week" data-wid="${w.id}">Copiar semana</button>`;
+  app.innerHTML = h;
+  renderClose();
+}
+
+function planCard(w, gid, title) {
+  const acts = actionsOf(w, gid);
+  let h = `<div class="card"><h3>${esc(title)}</h3>`;
+  if (!acts.length) h += `<p class="hint">${gid ? 'Apunta de 1 a 3 acciones concretas.' : 'Acciones no ligadas a ningún objetivo.'}</p>`;
+  acts.forEach(a => {
+    h += `<div class="row"><input type="text" data-aid="${a.id}" value="${esc(a.text)}" placeholder="Acción concreta" enterkeyhint="done" autocomplete="off">
+      <button class="x" data-act="del-action" data-aid="${a.id}" aria-label="Borrar acción">×</button></div>`;
+  });
+  if (gid === null || acts.length < MAX_ACTIONS_PER_GOAL)
+    h += `<button class="link" data-act="add-action" data-goal="${gid || ''}">+ Añadir acción</button>`;
+  return h + `</div>`;
+}
+
+function renderClose() {
+  const box = $('close'); if (!box) return;
+  const w = cur();
+  const groups = planGroups(w);
+  if (!groups.length) { box.innerHTML = `<p class="hint">Cuando tengas acciones en el plan, aquí podrás marcarlas.</p>`; return; }
+  let h = '';
+  groups.forEach(gr => gr.actions.forEach(a => {
+    h += `<div class="card"><div class="goal-tag">${esc(gr.title)}</div><div class="act-title">${esc(a.text)}</div>
+      <div class="seg">${Object.keys(STATUS).map(s =>
+        `<button data-act="status" data-aid="${a.id}" data-s="${s}" class="${a.status === s ? 'on' : ''}">${STATUS[s]}</button>`).join('')}</div>`;
+    if (a.status === 'partial' || a.status === 'not') {
+      h += a.reason
+        ? `<button class="reason" data-act="edit-reason" data-aid="${a.id}">${esc(REASON[a.reason])}${a.comment ? ' · ' + esc(a.comment) : ''}</button>`
+        : `<button class="reason missing" data-act="edit-reason" data-aid="${a.id}">Falta el motivo</button>`;
+    }
+    h += `</div>`;
+  }));
+  box.innerHTML = h;
+}
+
+function renderHistory() {
+  const curId = currentWeekId();
+  const ids = Object.keys(state.weeks).filter(id => id < curId).sort().reverse();
+  let h = `<h1>Historial</h1><p class="sub">Semanas anteriores</p>`;
+  if (!ids.length) h += `<p class="hint">Todavía no hay semanas anteriores.</p>`;
+  ids.forEach(id => { h += `<button class="hist-item" data-act="open-week" data-wid="${id}"><span>${esc(weekLabel(id))}</span><span>›</span></button>`; });
+  h += `<h2>Copia de seguridad</h2>
+    <button class="btn" data-act="export">Exportar todo</button>
+    <button class="btn" data-act="import">Importar copia de seguridad</button>`;
+  app.innerHTML = h;
+}
+
+function renderHistoryWeek() {
+  const w = state.weeks[state.histId];
+  let h = `<button class="back" data-act="back">‹ Historial</button>
+    <h1>${esc(weekLabel(w.id))}</h1><p class="sub">Solo lectura</p>`;
+  h += `<h2>Objetivos</h2><div class="card">`;
+  const goals = w.goals.filter(g => g.text.trim());
+  h += goals.length ? `<ol class="ro-list">${goals.map(g => `<li>${esc(g.text)}</li>`).join('')}</ol>` : `<p class="hint" style="margin:0">Sin objetivos</p>`;
+  h += `</div><h2>Plan</h2>`;
+  const groups = planGroups(w);
+  if (!groups.length) h += `<p class="hint">Sin acciones</p>`;
+  groups.forEach(gr => {
+    h += `<div class="card"><h3>${esc(gr.title)}</h3>`;
+    gr.actions.forEach(a => {
+      const st = a.status ? `<span class="st ${a.status}">${STATUS[a.status]}</span>` : `<span class="st none">Sin marcar</span>`;
+      const det = [a.reason ? REASON[a.reason] : '', a.comment || ''].filter(Boolean).join(' · ');
+      h += `<div class="ro-act"><div>${esc(a.text)}</div><div>${st}${det ? ` <span class="ro-detail">· ${esc(det)}</span>` : ''}</div></div>`;
+    });
+    h += `</div>`;
+  });
+  h += `<h2>Notas</h2><div class="card">`;
+  const notes = [...w.notes].sort((a, b) => a.ts - b.ts);
+  if (!notes.length) h += `<p class="hint" style="margin:0">Sin notas</p>`;
+  notes.forEach(n => { h += `<div class="note"><div class="note-body"><div class="note-time">${esc(fmtNote.format(new Date(n.ts)))}</div><div class="note-text">${esc(n.text)}</div></div></div>`; });
+  h += `</div><h2>Avances de la semana</h2><div class="card"><div class="ro-text">${w.progress.trim() ? esc(w.progress) : '<span class="hint">Sin avances anotados</span>'}</div></div>
+    <div style="height:10px"></div>
+    <button class="btn" data-act="copy-week" data-wid="${w.id}">Copiar semana</button>`;
+  app.innerHTML = h;
+}
+
+function renderGoals() {
+  let h = `<h1>Objetivos</h1><p class="sub">Tus objetivos de medio plazo (máximo ${MAX_GOALS}). Se mantienen de una semana a otra.</p><div class="card">`;
+  if (!state.goals.length) h += `<p class="hint">Sin objetivos todavía.</p>`;
+  state.goals.forEach(g => {
+    h += `<div class="row"><input type="text" data-gid="${g.id}" value="${esc(g.text)}" placeholder="Objetivo" enterkeyhint="done" autocomplete="off">
+      <button class="x" data-act="del-goal" data-gid="${g.id}" aria-label="Borrar objetivo">×</button></div>`;
+  });
+  if (state.goals.length < MAX_GOALS) h += `<button class="link" data-act="add-goal">+ Añadir objetivo</button>`;
+  app.innerHTML = h + `</div>`;
+}
+
+/* ---------- Acciones de usuario ---------- */
+function focusInput(attr, id) {
+  const el = app.querySelector(`input[${attr}="${id}"]`);
+  if (el) el.focus();
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b) return;
+  const act = b.dataset.act;
+  const w = cur();
+
+  switch (act) {
+    case 'tab':
+      flush();
+      state.tab = b.dataset.tab; state.histId = null;
+      render(); window.scrollTo(0, 0); break;
+
+    case 'note': openNote(); break;
+
+    case 'add-action': {
+      const gid = b.dataset.goal || null;
+      const empty = actionsOf(w, gid).find(a => !a.text.trim());
+      if (empty) { focusInput('data-aid', empty.id); break; }
+      const a = { id: uid(), goalId: gid, text: '', status: null, reason: null, comment: '' };
+      w.actions.push(a); saveWeekNow(w); renderWeek(); focusInput('data-aid', a.id); break;
+    }
+    case 'del-action': {
+      const a = w.actions.find(x => x.id === b.dataset.aid); if (!a) break;
+      if (a.status && !confirm('Esta acción ya está marcada en el cierre. ¿Borrarla?')) break;
+      w.actions = w.actions.filter(x => x !== a); saveWeekNow(w); renderWeek(); break;
+    }
+    case 'status': {
+      const a = w.actions.find(x => x.id === b.dataset.aid); if (!a) break;
+      const s = b.dataset.s;
+      if (s === 'done') {
+        a.status = a.status === 'done' ? null : 'done'; a.reason = null; a.comment = '';
+        saveWeekNow(w); renderClose();
+      } else openReason(a, s);
+      break;
+    }
+    case 'edit-reason': {
+      const a = w.actions.find(x => x.id === b.dataset.aid);
+      if (a) openReason(a, a.status); break;
+    }
+    case 'del-note':
+      if (!confirm('¿Borrar esta nota?')) break;
+      w.notes = w.notes.filter(n => n.id !== b.dataset.nid); saveWeekNow(w); renderWeek(); break;
+
+    case 'copy-week': {
+      flush();
+      const wk = state.weeks[b.dataset.wid];
+      if (wk) copyText(weekToMarkdown(wk)).then(ok => toast(ok ? 'Semana copiada' : 'No se pudo copiar'));
+      break;
+    }
+    case 'open-week': state.histId = b.dataset.wid; render(); window.scrollTo(0, 0); break;
+    case 'back': state.histId = null; render(); window.scrollTo(0, 0); break;
+    case 'export': exportAll(); break;
+    case 'import': $('import-input').click(); break;
+
+    case 'add-goal': {
+      const empty = state.goals.find(g => !g.text.trim());
+      if (empty) { focusInput('data-gid', empty.id); break; }
+      if (state.goals.length >= MAX_GOALS) break;
+      const g = { id: uid(), text: '' };
+      state.goals.push(g); syncGoalsToCurrentWeek(); flush(); renderGoals(); focusInput('data-gid', g.id); break;
+    }
+    case 'del-goal': {
+      const gid = b.dataset.gid;
+      const linked = w.actions.filter(a => a.goalId === gid);
+      if (linked.length && !confirm('Las acciones de este objetivo en la semana actual pasarán a "Sin objetivo". ¿Borrar el objetivo?')) break;
+      linked.forEach(a => { a.goalId = null; });
+      state.goals = state.goals.filter(g => g.id !== gid);
+      syncGoalsToCurrentWeek(); flush(); renderGoals(); break;
+    }
+  }
+});
+
+app.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.aid) {
+    const w = cur(); const a = w.actions.find(x => x.id === t.dataset.aid);
+    if (a) { a.text = t.value; saveWeekSoon(w); }
+  } else if (t.dataset.field === 'progress') {
+    const w = cur(); w.progress = t.value; saveWeekSoon(w);
+  } else if (t.dataset.gid) {
+    const g = state.goals.find(x => x.id === t.dataset.gid);
+    if (g) { g.text = t.value; syncGoalsToCurrentWeek(); }
+  }
+});
+app.addEventListener('change', e => { if (e.target.dataset.aid) renderClose(); });
+app.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches('input[type=text]')) { e.preventDefault(); e.target.blur(); }
+});
+
+/* Nota rápida */
+const noteDlg = $('note-dlg'), noteTa = $('note-ta');
+function openNote() { noteTa.value = ''; noteDlg.showModal(); noteTa.focus(); }
+$('note-cancel').onclick = () => noteDlg.close();
+$('note-save').onclick = () => {
+  const text = noteTa.value.trim();
+  if (text) {
+    const w = cur();
+    w.notes.push({ id: uid(), ts: Date.now(), text });
+    saveWeekNow(w);
+    if (state.tab === 'week') renderWeek();
+    toast('Nota guardada');
+  }
+  noteDlg.close();
+};
+
+/* Motivo de Parcial / No hecho */
+const reasonDlg = $('reason-dlg');
+let reasonCtx = null;
+function openReason(a, s) {
+  reasonCtx = { a, s, reason: a.reason || null };
+  $('reason-title').textContent = `${STATUS[s]}: ¿por qué?`;
+  $('reason-action').textContent = a.text;
+  $('reason-comment').value = a.comment || '';
+  updateReasonUI();
+  reasonDlg.showModal();
+}
+function updateReasonUI() {
+  reasonDlg.querySelectorAll('.opt').forEach(o => o.classList.toggle('on', o.dataset.reason === reasonCtx.reason));
+  $('reason-save').disabled = !reasonCtx.reason;
+}
+reasonDlg.querySelectorAll('.opt').forEach(o => o.onclick = () => { reasonCtx.reason = o.dataset.reason; updateReasonUI(); });
+$('reason-cancel').onclick = () => reasonDlg.close();
+$('reason-save').onclick = () => {
+  if (!reasonCtx || !reasonCtx.reason) return;
+  const { a, s, reason } = reasonCtx;
+  a.status = s; a.reason = reason; a.comment = $('reason-comment').value.trim();
+  saveWeekNow(cur()); renderClose(); reasonDlg.close();
+};
+reasonDlg.addEventListener('close', () => { reasonCtx = null; });
+
+/* ---------- Portapapeles, exportar, importar ---------- */
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch (_) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+    let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+    ta.remove(); return ok;
+  }
+}
+
+function downloadFile(file) {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement('a');
+  a.href = url; a.download = file.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+async function exportAll() {
+  flush();
+  const weeks = Object.values(state.weeks).sort((a, b) => b.id.localeCompare(a.id));
+  const md = weeks.map(weekToMarkdown).join('\n---\n\n');
+  const json = JSON.stringify({ app: 'revision-semanal', version: 1, exportedAt: new Date().toISOString(), goals: state.goals, weeks }, null, 2);
+  const date = ymd(new Date());
+  const fMd = new File([md], `revision-semanal-${date}.md`, { type: 'text/plain' });
+  const fJson = new File([json], `revision-semanal-${date}.json`, { type: 'text/plain' });
+
+  // En iPhone, la hoja de compartir permite "Guardar en Archivos" ambos ficheros a la vez
+  if (navigator.canShare && navigator.canShare({ files: [fMd, fJson] })) {
+    try { await navigator.share({ files: [fMd, fJson] }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  downloadFile(fMd);
+  setTimeout(() => downloadFile(fJson), 700);
+}
+
+const str = v => typeof v === 'string' ? v : '';
+function normWeek(w) {
+  return {
+    id: w.id,
+    goals: (Array.isArray(w.goals) ? w.goals : []).map(g => ({ id: String(g.id || uid()), text: str(g.text) })),
+    actions: (Array.isArray(w.actions) ? w.actions : []).map(a => {
+      const status = STATUS[a.status] ? a.status : null;
+      return {
+        id: String(a.id || uid()), goalId: a.goalId ? String(a.goalId) : null, text: str(a.text), status,
+        reason: status && status !== 'done' && REASON[a.reason] ? a.reason : null,
+        comment: status && status !== 'done' ? str(a.comment) : ''
+      };
+    }),
+    notes: (Array.isArray(w.notes) ? w.notes : []).filter(n => n && Number.isFinite(n.ts))
+      .map(n => ({ id: String(n.id || uid()), ts: n.ts, text: str(n.text) })),
+    progress: str(w.progress)
+  };
+}
+
+$('import-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (_) { alert('El archivo no es un JSON válido.'); return; }
+  if (!data || !Array.isArray(data.weeks) || !Array.isArray(data.goals)) { alert('Este archivo no parece una copia de seguridad de esta app.'); return; }
+  const weeks = data.weeks.filter(w => w && typeof w.id === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(w.id)).map(normWeek);
+  const goals = data.goals.filter(g => g).slice(0, MAX_GOALS).map(g => ({ id: String(g.id || uid()), text: str(g.text) }));
+  if (!confirm(`Se importarán ${weeks.length} semana(s) y ${goals.length} objetivo(s). Esto sustituye todos los datos actuales. ¿Continuar?`)) return;
+  try {
+    flush();
+    await idbReplaceAll(goals, weeks);
+    state.goals = goals; state.weeks = {};
+    weeks.forEach(w => { state.weeks[w.id] = w; });
+    cur();
+    state.histId = null; render();
+    toast('Copia importada');
+  } catch (err) { console.error(err); alert('No se pudo importar la copia.'); }
+});
+
+/* ---------- Ciclo de vida ---------- */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { flush(); return; }
+  // Si ha empezado una semana nueva mientras la app estaba abierta, se crea y se muestra
+  if (!state.weeks[currentWeekId()]) { cur(); render(); }
+});
+window.addEventListener('pagehide', flush);
+
+/* Icono y manifest para la pantalla de inicio */
+(function () {
+  let icon = '';
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 180;
+    const x = c.getContext('2d');
+    x.fillStyle = '#0a66d8'; x.fillRect(0, 0, 180, 180);
+    x.strokeStyle = '#ffffff'; x.lineWidth = 16; x.lineCap = 'round'; x.lineJoin = 'round';
+    x.beginPath(); x.moveTo(52, 94); x.lineTo(80, 122); x.lineTo(130, 62); x.stroke();
+    icon = c.toDataURL('image/png');
+    $('touch-icon').href = icon;
+  } catch (_) {}
+  const manifest = {
+    name: 'Revisión semanal', short_name: 'Semana', display: 'standalone',
+    background_color: '#f2f2f7', theme_color: '#0a66d8',
+    icons: icon ? [{ src: icon, sizes: '180x180', type: 'image/png' }] : []
+  };
+  $('manifest').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+})();
+
+/* Arranque */
+(async function init() {
+  try {
+    db = await openDB();
+    const [weeks, goals] = await Promise.all([idbGetAll('weeks'), idbGet('settings', 'goals')]);
+    state.goals = Array.isArray(goals) ? goals : [];
+    weeks.forEach(w => { state.weeks[w.id] = normWeek(w); });
+    cur();
+  } catch (e) {
+    console.error(e);
+    app.innerHTML = '<h1>Error</h1><p>No se pudo abrir el almacenamiento del dispositivo. Comprueba que Safari no está en modo privado.</p>';
+    return;
+  }
+  render();
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+})();
+</script>
+</body>
+</html>
